@@ -81,17 +81,47 @@ constexpr auto operator+(const A& a, const B& b)
     return result;
 }
 
+template <typename M, typename Scalar>
+    requires std::derived_from<M, MatrixLike<M::height, M::length, typename M::ValueType>>
+constexpr auto operator*(const M& matrix, Scalar scalar)
+{
+    constexpr int Rows = M::height;
+    constexpr int Columns = M::length;
+    using Type = typename M::ValueType;
+    Matrix<Rows, Columns, Type> result {};
+
+    for (size_t y = 0; y < Rows; ++y)
+        for (size_t x = 0; x < Columns; ++x)
+            result[y, x] = matrix[y, x] * scalar;
+
+    return result;
+}
+
+// TODO: introduce the concept for matrixkind.
+template <typename M>
+    requires std::derived_from<M, MatrixLike<M::height, M::length, typename M::ValueType>>
+constexpr void simple_print(const M& matrix)
+{
+    for (int y = 0; y < matrix.height; y++) {
+        for (int x = 0; x < matrix.length; x++)
+            cout << matrix[y, x] << " ";
+        cout << endl;
+    }
+}
+
 int main()
 {
     auto o = Matrix<2, 2> {};
-    for (int y = 0; y < o.height; y++) {
-        for (int x = 0; x < o.length; x++)
-            cout << o[y, x] << " ";
-        cout << endl;
-    }
+    simple_print(o);
 
-    constexpr auto a = Matrix<2, 2> {
-        { 1, 2 },
-        { 3, 4 },
+    constexpr auto a = Matrix<2, 3> {
+        { 1, 2, 3 },
+        { 4, 5, 6 },
     };
+    simple_print(a * 10);
+
+    // constexpr auto a = Matrix<2, 2, float> {
+    //     { 1, 2 },
+    //     { 3, 4 },
+    // };
 }
