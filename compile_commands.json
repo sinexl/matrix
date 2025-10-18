@@ -1,0 +1,18 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++23",
+      "-Wall",
+      "-Wextra",
+      "-Wswitch-enum",
+      "-o",
+      "main",
+      "Matrix.cpp"
+    ],
+    "directory": "/home/sinex/Programming/cpp/matrix",
+    "file": "/home/sinex/Programming/cpp/matrix/Matrix.cpp",
+    "output": "/home/sinex/Programming/cpp/matrix/main"
+  }
+]
