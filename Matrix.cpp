@@ -7,7 +7,7 @@ using std::cout;
 using std::endl;
 
 template <int Rows, int Columns, typename Type = int>
-struct MatrixLike {
+struct BasicMatrix {
     static constexpr int height = Rows;
     static constexpr int length = Columns;
     using ValueType = Type;
@@ -18,8 +18,12 @@ struct MatrixLike {
     }
 };
 
+template <typename M>
+concept MatrixLike =
+    std::derived_from<M, BasicMatrix<M::height, M::length, typename M::ValueType>>;
+
 template <int Rows, int Columns, typename Type = int>
-struct Matrix : MatrixLike<Rows, Columns, Type> {
+struct Matrix : BasicMatrix<Rows, Columns, Type> {
     Type data[Rows][Columns];
 
     static constexpr decltype(auto) index(auto&& self, size_t row, size_t column)
@@ -42,22 +46,25 @@ struct Matrix : MatrixLike<Rows, Columns, Type> {
         }
     }
 
-    constexpr Matrix()
-    {
-        std::fill(&data[0][0], &data[0][0] + Rows * Columns, Type {});
+    // If you need zero-filled matrix, it is recommended to use ZeroMatrix class that doesn't allocate any memory.
+    constexpr Matrix() {
+        // TODO: For some curious reason, std::fill doesnt work on constexpr
+        for (size_t i = 0; i < Rows; ++i)
+            for (size_t j = 0; j < Columns; ++j)
+                data[i][j] = Type{};
     }
 };
 
 template <int N, typename Type = int>
-struct IdentityMatrix : MatrixLike<N, N, Type> {
-    static Type index(auto&&, [[maybe_unused]] size_t row, [[maybe_unused]] size_t column)
+struct IdentityMatrix : BasicMatrix<N, N, Type> {
+    constexpr static Type index(auto&&, [[maybe_unused]] size_t row, [[maybe_unused]] size_t column)
     {
         return row == column ? Type { 1 } : Type { 0 };
     }
 };
 
 template <int Rows, int Columns, typename Type = int>
-struct ZeroMatrix : MatrixLike<Rows, Columns, Type> {
+struct ZeroMatrix : BasicMatrix<Rows, Columns, Type> {
     constexpr static Type index(auto&&, [[maybe_unused]] size_t row, [[maybe_unused]] size_t column)
     {
         return Type { 0 }; // TODO: option to add useless (in this scenario) bound check,
@@ -65,9 +72,9 @@ struct ZeroMatrix : MatrixLike<Rows, Columns, Type> {
     }
 };
 
-template <typename A, typename B>
-    requires std::derived_from<A, MatrixLike<A::height, A::length, typename A::ValueType>>
-    && std::derived_from<B, MatrixLike<A::height, A::length, typename A::ValueType>>
+
+
+template <MatrixLike A, MatrixLike B>
 constexpr auto operator+(const A& a, const B& b)
 {
     constexpr int Rows = A::height;
@@ -81,10 +88,11 @@ constexpr auto operator+(const A& a, const B& b)
     return result;
 }
 
-template <typename M, typename Scalar>
-    requires std::derived_from<M, MatrixLike<M::height, M::length, typename M::ValueType>>
+
+
+template <MatrixLike M, typename Scalar>
 constexpr auto operator*(const M& matrix, Scalar scalar)
-{
+    {
     constexpr int Rows = M::height;
     constexpr int Columns = M::length;
     using Type = typename M::ValueType;
@@ -97,9 +105,7 @@ constexpr auto operator*(const M& matrix, Scalar scalar)
     return result;
 }
 
-// TODO: introduce the concept for matrixkind.
-template <typename M>
-    requires std::derived_from<M, MatrixLike<M::height, M::length, typename M::ValueType>>
+template <MatrixLike M>
 constexpr void simple_print(const M& matrix)
 {
     for (int y = 0; y < matrix.height; y++) {
@@ -111,14 +117,15 @@ constexpr void simple_print(const M& matrix)
 
 int main()
 {
-    auto o = Matrix<2, 2> {};
+    constexpr auto o = Matrix<2, 2>();
+
     simple_print(o);
 
     constexpr auto a = Matrix<2, 3> {
         { 1, 2, 3 },
         { 4, 5, 6 },
     };
-    simple_print(a * 10);
+    simple_print((a + a) * 10);
 
     // constexpr auto a = Matrix<2, 2, float> {
     //     { 1, 2 },
