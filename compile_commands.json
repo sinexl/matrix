@@ -9,10 +9,10 @@
       "-Wswitch-enum",
       "-o",
       "main",
-      "Matrix.cpp"
+      "example.cpp"
     ],
     "directory": "/home/sinex/Programming/cpp/matrix",
-    "file": "/home/sinex/Programming/cpp/matrix/Matrix.cpp",
+    "file": "/home/sinex/Programming/cpp/matrix/example.cpp",
     "output": "/home/sinex/Programming/cpp/matrix/main"
   }
 ]
