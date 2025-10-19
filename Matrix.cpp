@@ -1,5 +1,4 @@
 #include <concepts>
-#include <cstring>
 #include <iostream>
 #include <utility>
 
@@ -19,8 +18,17 @@ struct BasicMatrix {
 };
 
 template <typename M>
-concept MatrixLike =
-    std::derived_from<M, BasicMatrix<M::height, M::length, typename M::ValueType>>;
+concept MatrixLike = std::derived_from<M, BasicMatrix<M::height, M::length, typename M::ValueType>>;
+
+template <typename A, typename B>
+concept SameDimensions = MatrixLike<A> && MatrixLike<B> && (A::height == B::height) && (A::length == B::length);
+
+template <typename M>
+concept SquareMatrix = MatrixLike<M> && (M::height == M::length);
+template <typename M>
+concept RowMatrix = MatrixLike<M> && (M::height == 1);
+template <typename M>
+concept ColumnMatrix = MatrixLike<M> && (M::length == 1);
 
 template <int Rows, int Columns, typename Type = int>
 struct Matrix : BasicMatrix<Rows, Columns, Type> {
@@ -47,11 +55,12 @@ struct Matrix : BasicMatrix<Rows, Columns, Type> {
     }
 
     // If you need zero-filled matrix, it is recommended to use ZeroMatrix class that doesn't allocate any memory.
-    constexpr Matrix() {
+    constexpr Matrix()
+    {
         // TODO: For some curious reason, std::fill doesnt work on constexpr
         for (size_t i = 0; i < Rows; ++i)
             for (size_t j = 0; j < Columns; ++j)
-                data[i][j] = Type{};
+                data[i][j] = Type {};
     }
 };
 
@@ -72,9 +81,8 @@ struct ZeroMatrix : BasicMatrix<Rows, Columns, Type> {
     }
 };
 
-
-
 template <MatrixLike A, MatrixLike B>
+    requires SameDimensions<A, B>
 constexpr auto operator+(const A& a, const B& b)
 {
     constexpr int Rows = A::height;
@@ -88,11 +96,21 @@ constexpr auto operator+(const A& a, const B& b)
     return result;
 }
 
+template <MatrixLike A, MatrixLike B>
+    requires SameDimensions<A, B>
+constexpr auto operator+=(A& a, const B& b)
+{
+    constexpr int Rows = A::height;
+    constexpr int Columns = A::length;
 
+    for (size_t y = 0; y < Rows; ++y)
+        for (size_t x = 0; x < Columns; ++x)
+            a[y, x] += b[y, x];
+}
 
 template <MatrixLike M, typename Scalar>
 constexpr auto operator*(const M& matrix, Scalar scalar)
-    {
+{
     constexpr int Rows = M::height;
     constexpr int Columns = M::length;
     using Type = typename M::ValueType;
