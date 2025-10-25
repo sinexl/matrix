@@ -35,7 +35,7 @@ constexpr auto operator+=(A& a, const B& b)
 
 template <MatrixLike A, MatrixLike B>
     requires ComfortableForMultiplication<A, B>
-auto operator*(const A& a, const B& b) {
+constexpr auto operator*(const A& a, const B& b) {
     constexpr int Rows = A::height;
     constexpr int Columns = B::length;
     using Type = decltype(std::declval<typename A::ValueType>() +
@@ -47,9 +47,7 @@ auto operator*(const A& a, const B& b) {
         for (size_t x = 0; x < Columns; x++) {
             for (size_t i = 0; i < Rows; ++i) {
                 result[y, x] += a[y, i] * b[i, x];
-                std::cout << a[y, i] << " " ;
             }
-            std::cout << std::endl;
         }
     }
 
