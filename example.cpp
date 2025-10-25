@@ -1,5 +1,6 @@
 #include "lib/concepts.hpp"
 #include "lib/operations.hpp"
+#include <cassert>
 #include <iostream>
 using namespace std;
 
@@ -17,22 +18,19 @@ constexpr void simple_print(const M& matrix)
 
 int main()
 {
-    constexpr auto o = Matrix<2, 2>();
-
-    simple_print(o);
-
-    constexpr auto a = Matrix<2, 3> {
-        { 1, 2, 3 },
-        { 4, 5, 6 },
-    };
-    constexpr auto b = a + a;
-
-    simple_print(b * 10);
-
-    constexpr auto square = Matrix<2, 2> {
+    constexpr auto a = Matrix<3, 2> {
         { 1, 2 },
-        { 3, 4 }
+        { 3, 4 },
+        { 5, 6 },
     };
-    auto c = square * a;
+    constexpr auto b = Matrix<2, 3> {
+        { 7, 8, 9 },
+        { 10, 11, 12 },
+    };
+
+    constexpr auto c = a * b;
     simple_print(c);
-};
+    cout << " ----- " << endl;
+    simple_print(transpose(Matrix<3, 2>{{1, 2}, {3, 4}, {5, 6}}));
+    assert(transpose(transpose(c)) == c);
+}

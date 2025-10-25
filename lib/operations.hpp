@@ -45,7 +45,7 @@ constexpr auto operator*(const A& a, const B& b) {
 
     for (size_t y = 0; y < Rows; y++) {
         for (size_t x = 0; x < Columns; x++) {
-            for (size_t i = 0; i < Rows; ++i) {
+            for (size_t i = 0; i < A::length; ++i) {
                 result[y, x] += a[y, i] * b[i, x];
             }
         }
@@ -80,6 +80,18 @@ constexpr bool operator==(const A& a, const B& b) {
         for (size_t x = 0; x < A::length; x++)
             if (a[y, x] != b[y, x]) return false;
     return true;
+}
+
+template<MatrixLike M>
+constexpr auto transpose(const M& matrix) {
+    constexpr int Rows = M::height;
+    constexpr int Columns = M::length;
+    using Type = typename M::ValueType;
+    Matrix<Columns, Rows, Type> result{};
+    for (size_t y = 0; y < Rows; y++)
+        for (size_t x = 0; x < Columns; x++)
+            result[x, y] = matrix[y, x];
+    return result;
 }
 
 #endif // OPERATIONS_H_
