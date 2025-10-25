@@ -1,6 +1,7 @@
 #include "lib/concepts.hpp"
 #include "lib/operations.hpp"
 #include <iostream>
+using namespace std;
 
 template <MatrixLike M>
 constexpr void simple_print(const M& matrix)
@@ -24,5 +25,14 @@ int main()
         { 1, 2, 3 },
         { 4, 5, 6 },
     };
-    simple_print((a + a) * 10);
-}
+    constexpr auto b = a + a;
+
+    simple_print(b * 10);
+
+    constexpr auto square = Matrix<2, 2> {
+        { 1, 2 },
+        { 3, 4 }
+    };
+    auto c = square * a;
+    simple_print(c);
+};

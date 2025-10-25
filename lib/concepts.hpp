@@ -15,6 +15,11 @@ concept SameDimensions =
     MatrixLike<A> && MatrixLike<B> &&
     (A::height == B::height) && (A::length == B::length);
 
+template <typename A, typename B>
+concept ComfortableForMultiplication =
+    MatrixLike<A> && MatrixLike<B> &&
+    (A::length == B::height);
+
 template <typename M>
 concept SquareMatrix = MatrixLike<M> && (M::height == M::length);
 template <typename M>
